@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>算法可视化演示系统</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="input-area">
+            <input type="text" id="dataInput" placeholder="输入9个整数，用逗号分隔">
+            <button id="btnSubmit">提交</button>
+            <button id="btnPause" disabled>暂停</button>
+            <button id="btnResume" disabled>继续</button>
+            <button id="btnReset">重置</button>
+        </div>
+        <div id="messageArea" class="message-area">系统就绪</div>
+        <div class="step-desc-area">
+            <p id="stepDescription">等待演示...</p>
+        </div>
+        <div class="visualizer-area">
+            <canvas id="canvas" width="800" height="400"></canvas>
+        </div>
+    </div>
+    <script src="./js/socket.js"></script>
+    <script src="./js/visualizer.js"></script>
+    <script src="./js/main.js"></script>
+</body>
+</html>
