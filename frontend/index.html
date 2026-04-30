@@ -2,37 +2,21 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>算法可视化系统 - 满配测试版</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f7f6; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: center; }
-        select, input, button { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        button { cursor: pointer; background: #007bff; color: white; border: none; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        .btn-group { border-left: 2px solid #ddd; padding-left: 10px; display: flex; gap: 5px;}
-        .msg { padding: 10px; margin-bottom: 10px; border-radius: 4px; background: #e9ecef; }
-        .step { font-size: 16px; font-weight: bold; padding: 10px; border-left: 4px solid #007bff; background: #e0f7fa; }
-        
-        .array-container { display: flex; gap: 10px; justify-content: center; margin-top: 30px; height: 100px; align-items: center; }
-        .box { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; background: white; border: 2px solid #ccc; border-radius: 6px; transition: 0.3s; position: relative;}
-        .box .idx { position: absolute; top: -20px; font-size: 12px; color: #888; }
-        .current { background: #ffcdd2; border-color: #f44336; }
-        .compare { background: #fff9c4; border-color: #ffeb3b; }
-        .pivot { border-color: #9c27b0; border-width: 4px; } /* 紫色边框代表基准值 */
-        .swap { transform: translateY(-20px) scale(1.1); }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <title>算法可视化系统</title>
+    <!-- 1. 只保留样式表引用 -->
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
     <div class="container">
         <h2 id="wsStatus">🔴 WebSocket 未连接</h2>
+        
+        <!-- 2. 交互控制区 -->
         <div class="controls">
             <select id="algoSelect">
                 <option value="heap">堆创建 (9个数字)</option>
                 <option value="quick_sort">快速排序 (3-15个数字)</option>
                 <option value="bubble_sort">冒泡排序 (3-15个数字)</option>
-               <option value="binary_tree">二叉树前序遍历 (3-15个数字)</option>
+                <option value="binary_tree">二叉树前序遍历 (3-15个数字)</option>
             </select>
             <input type="text" id="dataInput" value="5, 3, 8, 2, 7, 1, 9, 4, 6" style="width: 200px;">
             <button id="btnSubmit">提交</button>
@@ -57,73 +41,24 @@
             <button id="btnReset" style="background:#dc3545; margin-left: auto;">重置</button>
         </div>
         
+        <!-- 3. 信息反馈区 -->
         <div class="msg" id="sysMessage">等待操作...</div>
         <div class="step" id="stepDesc">进度: 准备就绪</div>
-        <div class="array-container" id="visualizer"></div>
+        
+        <!-- 4. 可视化画布 -->
+        <div id="visualizer" class="visualizer-area">
+            <svg id="treeLines" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></svg>
+        </div>
     </div>
 
-    <script>
-        const socket = io('http://127.0.0.1:5000');
-        let currentSid = null;
-        const ui = {
-            status: document.getElementById('wsStatus'), msg: document.getElementById('sysMessage'),
-            step: document.getElementById('stepDesc'), vis: document.getElementById('visualizer')
-        };
-
-        // 断线重连与异常测试逻辑
-        socket.on('connect', () => { ui.status.innerText = '🟢 WebSocket 已连接'; ui.status.style.color = 'green'; });
-        socket.on('disconnect', () => { ui.status.innerText = '🔴 WebSocket 已断开 (重连中...)'; ui.status.style.color = 'red'; });
-        socket.on('connected', data => { currentSid = data.sid; });
-
-        socket.on('step_data', step => {
-            ui.step.innerText = `[${step.algorithm === 'heap' ? '堆' : '快排'}] 步 ${step.step_id}: ${step.description}`;
-            render(step);
-        });
-        socket.on('complete', data => { ui.msg.innerText = data.message; toggleBtns(false, false, true, false); });
-
-        function render(step) {
-            ui.vis.innerHTML = '';
-            step.array.forEach((val, i) => {
-                const box = document.createElement('div'); box.className = 'box';
-                box.innerHTML = `<span class="idx">[${i}]</span>${val}`;
-                if (i === step.current_node) box.classList.add('current');
-                if (i === step.compare_node) box.classList.add('compare');
-                if (i === step.pivot_node) box.classList.add('pivot');
-                if (step.swap && (i === step.current_node || i === step.compare_node)) box.classList.add('swap');
-                if (step.visited && step.visited.includes(i)) box.classList.add('visited');
-                ui.vis.appendChild(box);
-            });
-        }
-
-        function toggleBtns(start, pause, prevNext, submit=false) {
-            document.getElementById('btnStart').disabled = !start;
-            document.getElementById('btnPause').disabled = !pause;
-            document.getElementById('btnPrev').disabled = !prevNext;
-            document.getElementById('btnNext').disabled = !prevNext;
-            document.getElementById('btnSubmit').disabled = submit;
-        }
-
-        // 事件监听
-        document.getElementById('btnSubmit').onclick = async () => {
-            try {
-                const res = await fetch('http://127.0.0.1:5000/api/submit', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ sid: currentSid, algo_type: document.getElementById('algoSelect').value, input_data: document.getElementById('dataInput').value })
-                });
-                const data = await res.json();
-                ui.msg.innerText = data.message;
-                if (res.ok) toggleBtns(true, false, true, true);
-                else ui.msg.style.color = 'red';
-            } catch(e) { ui.msg.innerText = "HTTP 连接后端失败，请检查 Flask"; ui.msg.style.color = 'red'; }
-        };
-
-        document.getElementById('btnStart').onclick = () => { socket.emit('control', {command: 'start'}); toggleBtns(false, true, false, true); };
-        document.getElementById('btnPause').onclick = () => { socket.emit('control', {command: 'pause'}); toggleBtns(true, false, true, true); };
-        document.getElementById('btnNext').onclick = () => { socket.emit('control', {command: 'step_forward'}); };
-        document.getElementById('btnPrev').onclick = () => { socket.emit('control', {command: 'step_backward'}); };
-        document.getElementById('speedSelect').onchange = (e) => { socket.emit('control', {command: 'set_speed', speed: e.target.value}); };
-        document.getElementById('btnReset').onclick = () => { location.reload(); };
-        
-    </script>
+    <!-- 5. 脚本引用：必须严格遵守此顺序 -->
+    <!-- 首先加载第三方库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <!-- 其次加载通信模块 (定义了 socket 实例) -->
+    <script src="./js/socket.js"></script>
+    <!-- 然后加载绘图模块 (定义了 render 函数) -->
+    <script src="./js/visualizer.js"></script>
+    <!-- 最后加载业务逻辑模块 (使用上述所有功能) -->
+    <script src="./js/main.js"></script>
 </body>
 </html>
