@@ -9,6 +9,21 @@ socket.on('step_data', (step) => {
     }
 });
 
+socket.on('complete', (data) => {
+    const msgEl = document.getElementById('sysMessage');
+    msgEl.innerText = data.message;
+    msgEl.style.color = "blue";
+
+    // 结束后恢复初始状态
+    const startBtn = document.getElementById('btnStart');
+    startBtn.innerText = "开始播放";
+    startBtn.disabled = true; // 播放完了，通常需要重新提交或重置才能再点
+    
+    document.getElementById('btnPause').disabled = true;
+    document.getElementById('btnNext').disabled = true;
+    document.getElementById('btnPrev').disabled = true;
+});
+
 // 提交按钮逻辑
 document.getElementById('btnSubmit').onclick = async () => {
     const inputStr = document.getElementById('dataInput').value;
@@ -33,6 +48,9 @@ document.getElementById('btnSubmit').onclick = async () => {
         // 如果后端响应成功，激活控制按钮
         if (res.ok) {
             sendControlCommand('set_speed', { speed: currentSpeed });
+            const startBtn = document.getElementById('btnStart');
+            startBtn.innerText = "开始播放"; // 重置为开始播放
+            startBtn.disabled = false;
             document.getElementById('btnStart').disabled = false;
             document.getElementById('btnPause').disabled = true;
             document.getElementById('btnNext').disabled = false;
@@ -48,13 +66,15 @@ document.getElementById('btnSubmit').onclick = async () => {
     }
 };
 
-// 点击【自动播放】
+// 点击【开始播放】
 document.getElementById('btnStart').onclick = () => {
     sendControlCommand('start');
     document.getElementById('btnStart').disabled = true;  // 自己变灰
     document.getElementById('btnPause').disabled = false; // 暂停变亮
     document.getElementById('btnNext').disabled = true;   // 自动播放时禁用单步
     document.getElementById('btnPrev').disabled = true;
+    // 当点击开始后，虽然按钮变灰了，但我们可以预设它下次亮起时显示“继续播放”
+    document.getElementById('btnStart').innerText = "继续播放";
 };
 
 // 监听速度下拉菜单的变化
@@ -73,6 +93,8 @@ document.getElementById('btnPause').onclick = () => {
     document.getElementById('btnPause').disabled = true;  // 自己变灰
     document.getElementById('btnNext').disabled = false;  // 恢复单步
     document.getElementById('btnPrev').disabled = false;
+    // 确保此时按钮文字显示为“继续播放”
+    document.getElementById('btnStart').innerText = "继续播放";
 };
 
 document.getElementById('btnNext').onclick = () => sendControlCommand('step_forward');

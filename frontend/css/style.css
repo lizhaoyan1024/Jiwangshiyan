@@ -48,3 +48,29 @@ body { font-family: sans-serif; padding: 20px; background: #f4f7f6; }
 select, input, button { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
 button { cursor: pointer; background: #007bff; color: white; border: none; }
 button:disabled { background: #ccc; }
+
+.result-container {
+    margin: 20px auto;
+    width: 90%;
+    padding: 15px;
+    background: #fdfdfd;
+    border: 2px dashed #007bff; /* 使用虚线框增加科技感 */
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.result-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.result-output {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 1.4rem;
+    color: #007bff;
+    word-wrap: break-word;
+    min-height: 1.6rem;
+}

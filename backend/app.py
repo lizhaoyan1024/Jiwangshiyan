@@ -40,7 +40,13 @@ def submit_data():
     user_sessions[sid] = {
         'steps': steps, 'index': 0, 'status': 'ready', 'speed': 1.2
     }
-    return jsonify({"status": "success", "message": f"{'堆创建' if algo_type=='heap' else '快速排序'} 解析成功"})
+    algo_names = {
+    'heap': '堆创建',
+    'quick_sort': '快速排序',
+    'bubble_sort': '冒泡排序',
+    'binary_tree': '二叉树前序遍历'
+    }
+    return jsonify({"status": "success", "message": f"{algo_names.get(algo_type, '未知算法')} 解析成功"})
 
 @socketio.on('connect')
 def handle_connect():

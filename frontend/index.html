@@ -30,7 +30,7 @@
             </div>
 
             <div class="btn-group">
-                <button id="btnStart" disabled>自动播放</button>
+                <button id="btnStart" disabled>开始播放</button>
                 <button id="btnPause" disabled>暂停</button>
             </div>
 
@@ -48,6 +48,12 @@
         <!-- 4. 可视化画布 -->
         <div id="visualizer" class="visualizer-area">
             <svg id="treeLines" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></svg>
+        </div>
+
+        <!-- 5. 结果展示区 -->
+        <div id="resultArea" class="result-container" style="display: none;">
+            <div class="result-label">当前遍历序列：</div>
+            <div id="traversalResult" class="result-output">[]</div>
         </div>
     </div>
 

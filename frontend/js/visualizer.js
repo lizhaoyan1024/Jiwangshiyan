@@ -42,8 +42,28 @@ function drawLine(svg, p1, p2) {
  */
 function render(step, algoType) {
     const vis = document.getElementById('visualizer');
+    const resultArea = document.getElementById('resultArea'); // 外部大容器
+    const resultOutput = document.getElementById('traversalResult'); // 文字显示区
     if (!vis) return;
     vis.innerHTML = ''; // 清空上一帧的内容
+
+    // 只有二叉树算法才显示结果区
+    if (algoType === 'binary_tree') {
+        if (resultArea) resultArea.style.display = 'block';
+        // 1. 检查后端传来的 visited 数组
+        if (step.visited && step.visited.length > 0) {
+            // 2. 后端存的是索引，我们需要映射成数组里的实际数值
+            // step.array 是后端传来的原始数组副本
+            const values = step.visited.map(idx => step.array[idx]);
+            
+            // 3. 将数值数组渲染到页面
+            resultOutput.innerText = values.join(' → ');
+        } else {
+            resultOutput.innerText = "等待开始...";
+        }
+    } else {
+        if (resultArea) resultArea.style.display = 'none';  // 其他算法隐藏结果区
+    }
 
     // 根据算法类型创建布局
     if (algoType === 'heap' || algoType === 'binary_tree') {
