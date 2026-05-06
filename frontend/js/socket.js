@@ -3,7 +3,7 @@
  */
 
 // 1. 初始化连接 (指向 Flask 后端地址)
-const socket = io('http://123.249.30.251:5000');
+const socket = io('http://119.3.160.194:5000');
 
 // 2. 状态监控：连接成功
 socket.on('connect', () => {
