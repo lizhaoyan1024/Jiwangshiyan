@@ -63,7 +63,7 @@ def build_heap_steps(arr):
     record_step("堆创建全部完成！")
     return steps
 # backend/algorithm_runner.py
-# (保留原有的 build_heap_steps 函数，并在文件最下方添加以下代码)
+
 
 def build_quick_sort_steps(arr):
     """
@@ -152,17 +152,24 @@ def build_bubble_sort_steps(arr):
     return steps
 
 def build_tree_steps(arr):
-    """新增扩展算法 2：二叉树前序遍历 (以数组模拟二叉树)"""
+    """新增扩展算法 2：二叉树前序遍历 (以数组模拟二叉树) - 带结果输出版"""
     steps = []
     step_id = 1
-    visited = [] # 记录已访问的节点
-
+    visited = [] # 记录已访问的节点索引（用于前端把框变绿）
+    traversal_result = [] 
     def record_step(desc, curr=None):
         nonlocal step_id
         steps.append({
-            "step_id": step_id, "algorithm": "binary_tree", "description": desc,
-            "array": arr.copy(), "current_node": curr, "compare_node": None,
-            "swap": False, "pivot_node": None, "visited": visited.copy() # 新增 visited 字段
+            "step_id": step_id, 
+            "algorithm": "binary_tree", 
+            "description": desc,
+            "array": arr.copy(), 
+            "current_node": curr, 
+            "compare_node": None,
+            "swap": False, 
+            "pivot_node": None, 
+            "visited": visited.copy(), 
+            "traversal_result": traversal_result.copy() 
         })
         step_id += 1
 
@@ -170,8 +177,10 @@ def build_tree_steps(arr):
         if idx >= len(arr): return
         
         record_step(f"抵达节点索引 {idx} (值: {arr[idx]})", curr=idx)
+        
         visited.append(idx)
-        record_step(f"【访问】记录节点 {arr[idx]} 到结果中", curr=idx)
+        traversal_result.append(arr[idx]) 
+        record_step(f"【访问】记录节点 {arr[idx]} 到结果数列中: {traversal_result}", curr=idx)
 
         left_idx = 2 * idx + 1
         if left_idx < len(arr):
@@ -185,5 +194,5 @@ def build_tree_steps(arr):
 
     record_step("初始二叉树(数组存储格式)，开始前序遍历 (根->左->右)")
     preorder(0)
-    record_step("二叉树前序遍历完成！")
+    record_step(f"二叉树前序遍历完成！最终数列: {traversal_result}")
     return steps

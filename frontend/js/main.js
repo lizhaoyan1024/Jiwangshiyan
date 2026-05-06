@@ -32,7 +32,7 @@ document.getElementById('btnSubmit').onclick = async () => {
     const msgEl = document.getElementById('sysMessage');
 
     try {
-        const res = await fetch('http://127.0.0.1:5000/api/submit', {
+        const res = await fetch('http://192.168.1.240:5000/api/submit', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ 
